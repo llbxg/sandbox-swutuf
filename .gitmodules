@@ -1,0 +1,3 @@
+[submodule "isar-cip-core"]
+	path = isar-cip-core
+	url = https://gitlab.com/cip-project/cip-core/isar-cip-core.git

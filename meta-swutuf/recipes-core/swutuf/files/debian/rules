@@ -1,0 +1,26 @@
+#!/usr/bin/make -f
+export DH_VERBOSE=1
+export PATH := /usr/lib/go-1.23/bin:$(PATH)
+
+DEB_HOST_ARCH := $(shell dpkg-architecture -qDEB_HOST_ARCH)
+GOOS := linux
+ifeq ($(DEB_HOST_ARCH),amd64)
+  GOARCH := amd64
+else ifeq ($(DEB_HOST_ARCH),arm64)
+  GOARCH := arm64
+else
+  $(error Unsupported DEB_HOST_ARCH=$(DEB_HOST_ARCH))
+endif
+
+export GOOS GOARCH CGO_ENABLED=0
+
+export HOME=/tmp
+export GOCACHE=/tmp/go-build
+export GOPATH=/tmp/gopath
+export GOMODCACHE=/tmp/gopath/pkg/mod
+
+%:
+	dh $@ --buildsystem=makefile
+
+override_dh_auto_build:
+	$(MAKE) build

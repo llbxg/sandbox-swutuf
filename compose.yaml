@@ -1,0 +1,86 @@
+version: "3.9"
+
+volumes:
+  rstuf-worker-data:
+  rstuf-api-data:
+  artifacts:
+  pgsql_data:
+  redis-data:
+  mq-data:
+
+services:
+  rstuf-worker:
+    image: ghcr.io/repository-service-tuf/repository-service-tuf-worker:v1.0.0
+    volumes:
+      - rstuf-worker-data:/var/opt/repository-service-tuf/storage
+      - ./settings/keys/online/:/var/opt/repository-service-tuf/keyvault/
+    environment:
+      RSTUF_STORAGE_BACKEND: LocalStorage
+      RSTUF_LOCAL_STORAGE_BACKEND_PATH: /var/opt/repository-service-tuf/storage
+      RSTUF_ONLINE_KEY_DIR: /var/opt/repository-service-tuf/keyvault
+      RSTUF_BROKER_SERVER: redis://redis
+      RSTUF_REDIS_SERVER: redis://redis
+      RSTUF_DB_SERVER: postgresql://postgres:secret@postgres:5432/postgres
+    depends_on:
+      - postgres
+      - redis
+    healthcheck:
+      test: "exit 0"
+    restart: always
+
+  rstuf-api:
+    image: ghcr.io/repository-service-tuf/repository-service-tuf-api:v1.0.0
+    volumes:
+      - rstuf-api-data:/data
+    ports:
+      - "8008:80"
+    environment:
+      RSTUF_BROKER_SERVER: redis://redis
+      RSTUF_REDIS_SERVER: redis://redis
+    depends_on:
+      - redis
+      - rstuf-worker
+    restart: always
+
+  artifacts-server:
+    image: svenstaro/miniserve:0.31.0
+    ports:
+      - "8011:8080"
+    volumes:
+      - artifacts:/data/artifacts
+      - rstuf-worker-data:/data/metadata
+    command: ["/data", "--upload-files"]
+    restart: always
+
+  postgres:
+    image: postgres:17.5-alpine3.21
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgsql_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres", "-d", "postgres"]
+      interval: 1s
+
+  rabbitmq:
+    image: rabbitmq:4.1.2
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+     - "mq-data:/var/lib/rabbitmq"
+    healthcheck:
+      test: "exit 0"
+
+  redis:
+    image: redis:8.0.3
+    volumes:
+      - redis-data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 1s
