@@ -1,0 +1,28 @@
+_source_dir: ${SOURCE_DIR}
+_source_dir_host: ${SOURCE_DIR_HOST}
+build_system: isar
+
+repos:
+  meta-swutuf:
+    path: meta-swutuf
+
+header:
+  includes:
+  - kas-cip.yml
+  - kas/board/qemu-amd64.yml
+  - kas/opt/bookworm.yml
+  - kas/opt/ebg-swu.yml
+  - meta-swutuf/kas/swutuf.yaml
+  version: 18
+
+local_conf_header:
+  source_epoch: |
+    SOURCE_DATE_EPOCH_FALLBACK = "1743075061"
+  swu-version: |
+    SWU_VERSION = "${SW_VERSION}"
+  tuf: |
+    ARTIFACTS_URL = "${ARTIFACTS_URL}"
+    METADATA_URL = "${METADATA_URL}"
+
+env:
+  PREMIRRORS: " \nhttps://cdn.kernel.org/.*/.* http://10.221.173.26:8001/ \n"

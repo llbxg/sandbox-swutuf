@@ -1,0 +1,16 @@
+Source: swutuf
+Section: utils
+Priority: optional
+Maintainer: Koshiro Onuki <koshiro1.onuki@toshiba.co.jp>
+Standards-Version:
+Build-Depends:
+ debhelper-compat (= 12),
+ dh-golang,
+ golang-1.23-go,
+ golang-1.23-src,
+ make
+
+Package: swutuf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: swutuf - A lightweight tool for downloading and verifying target files using TUF.

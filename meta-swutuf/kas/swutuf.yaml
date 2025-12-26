@@ -1,0 +1,23 @@
+header:
+  version: 14
+
+repos:
+  meta-swutuf:
+    path: ../meta-swutuf
+    layers:
+      .:
+
+local_conf_header:
+  bookworm-backports: |
+    DISTRO_APT_SOURCES:append:bookworm = " conf/distro/debian-bookworm-backports.list"
+    DISTRO_APT_PREFERENCES:append:bookworm = " conf/distro/preferences.bookworm-backports.conf"
+  demo-settings: |
+    IMAGE_INSTALL:append = " swutuf swutuf-config"
+    IMAGE_PREINSTALL:append = " nano curl"
+  enable-selfbuilt-swupdate: |
+    OVERRIDES .= ":swupdate"
+    SWUPDATE_SELFBUILT:bookworm = "1"
+    SWU_SIGNED:swupdate = "0"
+
+env:
+  DEB_BUILD_PROFILES: "pkg.swupdate.nosigning"
