@@ -16,6 +16,9 @@ guard-host-ip:
   fi
 
 # ---- top-level commands ----
+init:
+  git submodule update --init --recursive
+
 image cmd:
   @just "image-{{cmd}}"
 
